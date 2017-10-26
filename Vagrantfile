@@ -44,8 +44,8 @@ vagrant_user = "vagrant"
 # code directories
 this_path = File.absolute_path(__FILE__)
 reddit_dir = File.expand_path("..", this_path)
-code_share_host_path = File.expand_path("..", reddit_dir)
-code_share_guest_path = "/media/reddit_code"
+code_share_host_path = reddit_dir #File.expand_path("..", reddit_dir)
+code_share_guest_path = "/home/#{vagrant_user}/reddit"
 plugins = [
   "about",
   "gold",
@@ -54,7 +54,7 @@ plugins = [
 ]
 
 # overlayfs directories
-overlay_mount = "/home/#{vagrant_user}/src"
+overlay_mount = "/home/#{vagrant_user}/reddit"
 overlay_lower = code_share_guest_path
 overlay_upper = "/home/#{vagrant_user}/.overlay"
 
@@ -66,11 +66,11 @@ hostname = "reddit.local"
 
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "trusty-cloud-image"
-  config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.box_url = "ubuntu/trusty64" #"https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
 
   # mount the host shared folder
-  config.vm.synced_folder code_share_host_path, code_share_guest_path, mount_options: ["ro"]
+  config.vm.synced_folder code_share_host_path, code_share_guest_path
 
   config.vm.provider "virtualbox" do |vb|
     vb.memory = guest_mem
@@ -140,6 +140,9 @@ Vagrant.configure(2) do |config|
 
       # rabbitmq web interface
       config.vm.network "forwarded_port", guest: 15672, host: 15672
+
+      # reddit web interface
+      config.vm.network "forwarded_port", guest: 8080, host: 80
 
       # run install script
       plugin_string = plugins.join(" ")
